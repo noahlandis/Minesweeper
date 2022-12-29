@@ -4,7 +4,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.Test;
 import org.junit.platform.commons.annotation.Testable;
-import Model.Minesweeper.GameState;
 
 @Testable
 public class MinesweeperTest {
