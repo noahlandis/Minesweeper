@@ -40,9 +40,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class MinesweeperGUI extends Application {
-    private final static int ROWS = 2;
-    private final static int COLS = 2;
-    private final static int MINE_COUNT = 2;
+    private final static int ROWS = 4;
+    private final static int COLS = 4;
+    private final static int MINE_COUNT = 1;
     private Minesweeper minesweeper = new Minesweeper(ROWS, COLS, MINE_COUNT);
     private ImageView hintIcon = new ImageView(new Image("View/Assets/Images/Hint.png"));
     private final ImageView RESET_ICON = new ImageView(new Image("View/Assets/Images/Reset.png"));
@@ -55,6 +55,8 @@ public class MinesweeperGUI extends Application {
     private Label lblStatus;
     private int r;
     private int c;
+    private GridPane grid;
+    private Button btn;
 
     
 
@@ -107,6 +109,7 @@ public class MinesweeperGUI extends Application {
     private Label statusBar() {
         lblStatus = new Label();
         lblStatus.setMaxWidth(Double.MAX_VALUE);
+        lblStatus.setFont(new Font(FONT_STRING, 15));
         lblStatus.setBackground(new Background(new BackgroundFill(Color.ORANGE, null, null)));
         lblStatus.setText(GameState.NOT_STARTED.toString());
         lblStatus.setAlignment(Pos.CENTER);
@@ -116,7 +119,7 @@ public class MinesweeperGUI extends Application {
    
 
     private GridPane grid() {
-        GridPane grid = new GridPane();
+        grid = new GridPane();
         for (int col = 0; col < COLS; col++) {
             for (int row = 0; row < ROWS; row++) {
                 Button btn = makeButton(row, col);
@@ -136,57 +139,31 @@ public class MinesweeperGUI extends Application {
         btn.setPrefSize(btn.getWidth(), btn.getHeight());
 
         btn.setOnAction(new Controller(row, col, minesweeper, this));
-        btn.getStylesheets().add("View/cell_button.css");
+        btn.getStylesheets().add("View/Assets/CSS/cell_button.css");
         minesweeper.register(new MinesweeperObserver() {
             @Override
             public void cellClicked(Cell cell) {
-                if (row == cell.getRow() && col == cell.getCol()) {
-                    System.out.println(row);
-                    System.out.println(col);
-                    Color color = null;
-                    char symbol = minesweeper.getSymbol(cell);
-                    switch (symbol) {
-                        case '1':
-                            color = Color.BLUE;
-                            break;
-                        case '2':
-                            color = Color.GREEN;
-                            break;
-                        case '3':
-                            color = Color.RED;
-                            break;
-                        case '4':
-                            color = Color.PURPLE;
-                            break;
-                        case '5':
-                            color = Color.MAROON;
-                            break;
-                        case '6':
-                            color = Color.TURQUOISE;
-                            break;
-                        case '7':
-                            color = Color.BLACK;
-                            break;
-                        case '8':
-                            color = Color.GRAY;
-                            break;
-                        case 'M':
-                            MINE_ICON.setFitHeight(btn.getWidth() / 3);
-                            MINE_ICON.setFitWidth(btn.getWidth() / 3);
-                            btn.setGraphic(MINE_ICON);
-                            break;
-                    }
-                    btn.setText(String.valueOf(symbol));
-                    Font font = new Font(FONT_STRING, btn.getWidth() / 3);
-                    btn.setFont(font);
-                    btn.setTextFill(color);
-                    btn.setTextAlignment(TextAlignment.CENTER);
-                    btn.setStyle("-fx-background-color: #b5adad");
-                
-                    
+                Color color = null;
+                lblStatus.setText(minesweeper.getGameState().toString());
+                if (minesweeper.getGameState() == GameState.IN_PROGRESS) {
+                    color = Color.YELLOW;
+                }
+                else if (minesweeper.getGameState() == GameState.WON) {
+                    color = Color.GREEN;
+                }
+                else if (minesweeper.getGameState() == GameState.LOST) {
+                    color = Color.RED;
+                }
+                lblStatus.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+                if (minesweeper.getGameState() == GameState.WON || minesweeper.getGameState() == GameState.LOST) {
+                    revealBoard(btn);
+                }
+                else if (row == cell.getRow() && col == cell.getCol()) {
+                    updateButton(btn);
                 }
             }
         });
+ 
         return btn;
     }
 
@@ -203,7 +180,7 @@ public class MinesweeperGUI extends Application {
         return c;
     }
 
-
+    
 
     public Node getButtonAtLocation(int row, int col) {
         Node result = null;
@@ -217,7 +194,7 @@ public class MinesweeperGUI extends Application {
     }
 
     private Button makeSideBarButton(ImageView image) {
-        Button btn = new Button();
+        btn = new Button();
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.maxHeightProperty().bind(btn.widthProperty());
         VBox.setVgrow(btn, Priority.ALWAYS);
@@ -228,7 +205,7 @@ public class MinesweeperGUI extends Application {
         lighting.setContentInput(bright);
         image.setEffect(lighting);
         btn.setGraphic(image);
-        btn.getStylesheets().add("View/sidebar_button.css");
+        btn.getStylesheets().add("View/Assets/CSS/sidebar_button.css");
         return btn;
     }
 
@@ -252,10 +229,59 @@ public class MinesweeperGUI extends Application {
         return lblStatus;
     }
     
+    public void revealBoard(Button btn) {
+        btn.setDisable(true);
+        updateButton(btn);
+    }
+
     
 
     public static void main(String[] args) {
         launch(args);
     }
-    
+
+    public void updateButton(Button btn) {
+        char symbol = minesweeper.getHiddenSymbol(new Cell(GridPane.getRowIndex(btn), GridPane.getColumnIndex(btn)));
+        Color color = null;
+        switch (symbol) {
+            case '1':
+                color = Color.BLUE;
+                break;
+            case '2':
+                color = Color.GREEN;
+                break;
+            case '3':
+                color = Color.RED;
+                break;
+            case '4':
+                color = Color.PURPLE;
+                break;
+            case '5':
+                color = Color.MAROON;
+                break;
+            case '6':
+                color = Color.TURQUOISE;
+                break;
+            case '7':
+                color = Color.BLACK;
+                break;
+            case '8':
+                color = Color.GRAY;
+                break;
+            case 'M':
+                MINE_ICON.setFitHeight(btn.getWidth() / 3);
+                MINE_ICON.setFitWidth(btn.getWidth() / 3);
+                ImageView image = new ImageView(new Image("View/Assets/Images/Mine.png"));
+                image.setFitHeight(btn.getWidth() / 3);
+                image.setFitWidth(btn.getWidth() / 3);
+                btn.setGraphic(image);
+                break;
+        }
+        btn.setText(String.valueOf(symbol));
+        Font font = new Font(FONT_STRING, btn.getWidth() / 3);
+        btn.setFont(font);
+        btn.setTextFill(color);
+        btn.setTextAlignment(TextAlignment.CENTER);
+        btn.getStylesheets().add("View/Assets/CSS/cell_button_disabled.css");
+    }
 }

@@ -1,10 +1,7 @@
 .button {
     -fx-border-color: rgb(0, 0, 0);
     -fx-border-radius: 10;
-    -fx-background-color: #727272;   
-
-    /* -fx-background-color: #b5adad;    */
-    
+    -fx-background-color: #727272;       
 }
 
 .button:pressed:hover {
@@ -18,3 +15,6 @@
     -fx-background-color: #292929;
 }
 
+.button:disabled {
+    -fx-opacity: 0.7;
+}

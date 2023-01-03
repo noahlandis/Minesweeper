@@ -227,4 +227,15 @@ public class Minesweeper  {
         }
         return list;
     }
+
+
+    /**
+     * Returns a symbol (represented as a char) at a given cell
+     * (Uncovered cells will show their true cell contents)
+     * @param cell cell object consisting of a row and col
+     * @return symbol at specified cell
+     */
+    public char getHiddenSymbol(Cell cell) {
+        return isCovered(cell) ? getAdjacentMines(cell) : map.get(cell);
+    }
 }

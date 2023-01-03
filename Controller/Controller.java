@@ -6,6 +6,8 @@ import Model.MinesweeperException;
 import View.MinesweeperGUI;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 
 public class Controller implements EventHandler<ActionEvent> {
     private Minesweeper minesweeper;
@@ -25,13 +27,11 @@ public class Controller implements EventHandler<ActionEvent> {
     public void handle(ActionEvent arg0) {
         try {
             minesweeper.makeSelection(new Cell(row, col));
-            System.out.println(minesweeper);
-            
-            gui.getStatusBar().setText(minesweeper.getGameState().toString());
 
-            
+
         } catch (MinesweeperException e) {
             gui.getStatusBar().setText(minesweeper.getGameState() + ": " + e.getMessage());
+
         }
     }
 }
