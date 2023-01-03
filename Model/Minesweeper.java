@@ -1,10 +1,12 @@
 package Model;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Represents a Minesweeper game
@@ -19,7 +21,17 @@ public class Minesweeper  {
     private int cols;
     private int mineCount;
     private Map<Cell, Character> map;
+    private Set<MinesweeperObserver> observers;
 
+    public void register(MinesweeperObserver observer) {
+        observers.add(observer);
+    }
+
+    public void notifyObservers(Cell cell) {
+        for (MinesweeperObserver observer: observers) {
+            observer.cellClicked(cell);
+        }
+    }
     /**
      * Constructs a Minesweeper object with <rows> x <columns> cells and <mineCount> randomly placed mines.
      * @param rows rows
@@ -31,6 +43,7 @@ public class Minesweeper  {
         this.cols = cols;
         this.mineCount = mineCount;
         initialize();
+        observers = new HashSet<>();
     }
 
     /**
@@ -136,6 +149,7 @@ public class Minesweeper  {
             gameState = GameState.WON;
         }
         moveCount++;
+        notifyObservers(cell);
     }
 
     private char getAdjacentMines(Cell cell) {
@@ -176,6 +190,9 @@ public class Minesweeper  {
         return gameState;
     }
 
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
 
     /**
      * Returns a symbol (represented as a char) at a given cell
