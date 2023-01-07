@@ -15,7 +15,7 @@ public class Controller implements EventHandler<ActionEvent> {
     private int row;
     private int col;
     
-
+    
     public Controller(int row, int col, Minesweeper minesweeper, MinesweeperGUI gui) {
         this.row = row;
         this.col = col;
@@ -28,10 +28,8 @@ public class Controller implements EventHandler<ActionEvent> {
         try {
             minesweeper.makeSelection(new Cell(row, col));
 
-
         } catch (MinesweeperException e) {
             gui.getStatusBar().setText(minesweeper.getGameState() + ": " + e.getMessage());
-
         }
     }
 }

@@ -87,7 +87,7 @@ public class Minesweeper  {
     /**
      * This is currently a test function to display the board's internal data.
      */
-    private void displayInternalData() {
+    public void displayInternalData() {
         for (int i = 0; i < rows; i++) {
             System.out.println();
             for (int j = 0; j < cols; j++) {
