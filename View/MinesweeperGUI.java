@@ -54,9 +54,9 @@ import javafx.stage.Stage;
 // import javafx.event.EventHandler;
 
 public class MinesweeperGUI extends Application  {
-    private final static int ROWS = 5;
-    private final static int COLS = 5;
-    private final static int MINE_COUNT = 5;
+    private final static int ROWS = 10;
+    private final static int COLS = 10;
+    private final static int MINE_COUNT = 10;
     private Minesweeper minesweeper = new Minesweeper(ROWS, COLS, MINE_COUNT);
     private ImageView hintIcon = new ImageView(new Image("View/Assets/Images/Hint.png"));
     private final ImageView RESET_ICON = new ImageView(new Image("View/Assets/Images/Reset.png"));
@@ -67,6 +67,7 @@ public class MinesweeperGUI extends Application  {
     private Button btnStart;
     private Button btnReset;
     private Label lblStatus;
+    private Label lblMoves;
     private int r;
     private int c;
     private GridPane grid;
@@ -75,24 +76,27 @@ public class MinesweeperGUI extends Application  {
     private MediaPlayer mediaPlayer;
     private String audioPath;
     private Timeline timeline;
-    private static int i = 0;
+    private static int i = 1;
+    private Stage stage;
     /**
      * GUI setup
      */
     @Override
     public void start(Stage stage) throws Exception {
+
         BorderPane root = new BorderPane();
         timeline = new Timeline();
-
         Scene scene = new Scene(root, Double.MAX_VALUE, Double.MAX_VALUE);
         root.setCenter(grid());
         root.setLeft(sideBar());
         root.setBottom(statusBar());
         stage.setScene(scene);
-        
         stage.setTitle("Minesweeper");
         stage.setMaximized(true);
         stage.show();
+
+
+        
     }
 
     
@@ -103,8 +107,18 @@ public class MinesweeperGUI extends Application  {
     private VBox sideBar() {
         VBox sideBar = new VBox();
         Label lblMines = makeLabel("Mines: " + MINE_COUNT);
-        Label lblMoves = makeLabel("Moves: " + minesweeper.getMoveCount());
+        lblMoves = makeLabel("Moves: " + minesweeper.getMoveCount());
         Button btnHint = makeSideBarButton(hintIcon);
+        btnHint.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                System.out.print(minesweeper.getPossibleSelections().toArray()[0]);
+                
+            }
+            
+        });
+
         btnReset = makeSideBarButton(RESET_ICON);
         btnReset.setOnAction(new Reset(minesweeper, this));
         btnStart = makeSideBarButton(START_ICON);
@@ -177,6 +191,7 @@ public class MinesweeperGUI extends Application  {
                 lblStatus.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
     
                 if (row == cell.getRow() && col == cell.getCol()) {
+                    lblMoves.setText("Moves: " + minesweeper.getMoveCount());
                     updateButton(btn);
                     if (mediaPlayer != null) {
                         mediaPlayer.play();
@@ -262,18 +277,17 @@ public class MinesweeperGUI extends Application  {
      */
     public void revealBoard(Button btn) {
         btn.setDisable(true);
-        timeline.getKeyFrames().add(new KeyFrame(javafx.util.Duration.seconds(i++), e -> {
-            updateButton(btn);
-        }));
+            timeline.getKeyFrames().add(new KeyFrame(javafx.util.Duration.millis(i+= 120), e -> {
+                updateButton(btn);
+            }));
         timeline.playFromStart();
-
     }
 
     
             
 
-    public void resetBoard() {
-        timeline.playFromStart();
+    public void resetBoard()  {
+        
 
 
         
@@ -343,8 +357,9 @@ public class MinesweeperGUI extends Application  {
         btn.setFont(font);
         btn.setTextFill(color);
         btn.setTextAlignment(TextAlignment.CENTER);
+        btn.getStylesheets().clear();
         btn.getStylesheets().add("View/Assets/CSS/cell_button_disabled.css");
-
+        
         
     }
 }
