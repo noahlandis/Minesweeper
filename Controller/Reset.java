@@ -16,11 +16,7 @@ public class Reset implements EventHandler<ActionEvent> {
 
     @Override
     public void handle(ActionEvent arg0) {
-    //     System.out.println(minesweeper);
-    //    minesweeper.initialize();
-       System.out.println(minesweeper);
-       
-        
+       minesweeper.initialize();
     }
     
 }

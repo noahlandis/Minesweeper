@@ -12,6 +12,7 @@ import javax.swing.border.LineBorder;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import Controller.Controller;
+import Controller.Hint;
 import Controller.Reset;
 import Model.Cell;
 import Model.GameState;
@@ -78,13 +79,14 @@ public class MinesweeperGUI extends Application  {
     private Timeline timeline;
     private static int i = 1;
     private Stage stage;
+    BorderPane root;
     /**
      * GUI setup
      */
     @Override
     public void start(Stage stage) throws Exception {
 
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
         timeline = new Timeline();
         Scene scene = new Scene(root, Double.MAX_VALUE, Double.MAX_VALUE);
         root.setCenter(grid());
@@ -94,9 +96,6 @@ public class MinesweeperGUI extends Application  {
         stage.setTitle("Minesweeper");
         stage.setMaximized(true);
         stage.show();
-
-
-        
     }
 
     
@@ -109,15 +108,7 @@ public class MinesweeperGUI extends Application  {
         Label lblMines = makeLabel("Mines: " + MINE_COUNT);
         lblMoves = makeLabel("Moves: " + minesweeper.getMoveCount());
         Button btnHint = makeSideBarButton(hintIcon);
-        btnHint.setOnAction(new javafx.event.EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                System.out.print(minesweeper.getPossibleSelections().toArray()[0]);
-                
-            }
-            
-        });
+        btnHint.setOnAction(new Hint(minesweeper, this));
 
         btnReset = makeSideBarButton(RESET_ICON);
         btnReset.setOnAction(new Reset(minesweeper, this));
@@ -126,6 +117,8 @@ public class MinesweeperGUI extends Application  {
         lblTimer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblTimer.setAlignment(Pos.CENTER);
         lblTimer.setTextAlignment(TextAlignment.CENTER);
+        btnStart.setOnAction(new StartEvent(lblTimer));
+
         VBox.setVgrow(lblTimer, Priority.ALWAYS);
         sideBar.getChildren().addAll(
             lblMines,
@@ -170,7 +163,6 @@ public class MinesweeperGUI extends Application  {
         btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         btn.setMinSize(btn.getWidth(), btn.getHeight());
         btn.setPrefSize(btn.getWidth(), btn.getHeight());
-
         btn.setOnAction(new Controller(row, col, minesweeper, this));
         btn.getStylesheets().add("View/Assets/CSS/cell_button.css");
 
@@ -179,7 +171,20 @@ public class MinesweeperGUI extends Application  {
             public void cellClicked(Cell cell) {
                 Color color = null;
                 lblStatus.setText(minesweeper.getGameState().toString());
-                if (minesweeper.getGameState() == GameState.IN_PROGRESS) {
+                lblMoves.setText("Moves: " + minesweeper.getMoveCount());
+                if (minesweeper.getGameState() == GameState.NOT_STARTED) {
+                    color = Color.ORANGE;
+                    btn.getStylesheets().clear();
+                    btn.setText("");
+                    btn.getStylesheets().add("View/Assets/CSS/cell_button.css");
+                    if (btn.getGraphic() != null) {
+                        btn.getGraphic().setVisible(false);
+                    }
+                    btn.setDisable(false);
+                    timeline.pause();
+
+                }
+                else if (minesweeper.getGameState() == GameState.IN_PROGRESS) {
                     color = Color.YELLOW;
                 }
                 else if (minesweeper.getGameState() == GameState.WON) {
@@ -189,9 +194,8 @@ public class MinesweeperGUI extends Application  {
                     color = Color.RED;
                 }
                 lblStatus.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
-    
-                if (row == cell.getRow() && col == cell.getCol()) {
-                    lblMoves.setText("Moves: " + minesweeper.getMoveCount());
+                
+                if (row == cell.getRow() && col == cell.getCol() && minesweeper.getGameState() != GameState.NOT_STARTED) {
                     updateButton(btn);
                     if (mediaPlayer != null) {
                         mediaPlayer.play();
@@ -199,14 +203,12 @@ public class MinesweeperGUI extends Application  {
                 }
                 if (minesweeper.getGameState() == GameState.WON || minesweeper.getGameState() == GameState.LOST) {
                     revealBoard(btn);
-                    
                     if (audioPath != null && audioPath.equals("View/Assets/Audio/msExplode.mp3")) {
                         mediaPlayer.play();
                     }
                 }
             }
-        });
- 
+        }); 
         return btn;
     }
 
@@ -225,15 +227,17 @@ public class MinesweeperGUI extends Application  {
 
     
 
-    public Node getButtonAtLocation(int row, int col) {
+    public Button getButtonAtLocation(int row, int col) {
         Node result = null;
-        for (Node node: grid().getChildren()) {
-            if (grid().getRowIndex(node) == row && grid().getColumnIndex(node) == col) {
+        for (Node node: grid.getChildren()) {
+            
+            if (grid.getRowIndex(node) == row && grid.getColumnIndex(node) == col) {
                 result = node;
                 break;
             }
         }
-        return result;
+
+        return (Button)result;
     }
 
     private Button makeSideBarButton(ImageView image) {
@@ -276,6 +280,7 @@ public class MinesweeperGUI extends Application  {
      * @param btn
      */
     public void revealBoard(Button btn) {
+        
         btn.setDisable(true);
             timeline.getKeyFrames().add(new KeyFrame(javafx.util.Duration.millis(i+= 120), e -> {
                 updateButton(btn);
@@ -286,12 +291,7 @@ public class MinesweeperGUI extends Application  {
     
             
 
-    public void resetBoard()  {
-        
-
-
-        
-    }
+    
 
     
 
@@ -328,7 +328,6 @@ public class MinesweeperGUI extends Application  {
             case '6':
                 color = Color.TURQUOISE;
                 audioPath = "View/Assets/Audio/ms6Clipped.mp3";    
-
                 break;
             case '7':
                 color = Color.BLACK;
@@ -352,6 +351,7 @@ public class MinesweeperGUI extends Application  {
             Media sound = new Media(new File(audioPath).toURI().toString());
             mediaPlayer = new MediaPlayer(sound);
         }
+    
         btn.setText(String.valueOf(symbol));
         Font font = new Font(FONT_STRING, btn.getWidth() / 3);
         btn.setFont(font);
@@ -359,7 +359,7 @@ public class MinesweeperGUI extends Application  {
         btn.setTextAlignment(TextAlignment.CENTER);
         btn.getStylesheets().clear();
         btn.getStylesheets().add("View/Assets/CSS/cell_button_disabled.css");
-        
-        
     }
+
+    
 }

@@ -42,8 +42,11 @@ public class Minesweeper  {
         this.rows = rows;
         this.cols = cols;
         this.mineCount = mineCount;
-        initialize();
+
         observers = new HashSet<>();
+        initialize();
+
+
     }
 
     /**
@@ -62,9 +65,12 @@ public class Minesweeper  {
                 if (!map.containsKey(cell)) {
                     // game starts with every cell covered and adjacent mines haven't been determined yet
                     map.put(cell, COVERED);
+                    notifyObservers(cell);
+
                 }
             }
         }
+
     }
 
     /**
