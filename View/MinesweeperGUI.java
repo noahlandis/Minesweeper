@@ -80,6 +80,7 @@ public class MinesweeperGUI extends Application  {
     private static int i = 1;
     private Stage stage;
     BorderPane root;
+    private StartEvent startEvent;
     /**
      * GUI setup
      */
@@ -117,7 +118,8 @@ public class MinesweeperGUI extends Application  {
         lblTimer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         lblTimer.setAlignment(Pos.CENTER);
         lblTimer.setTextAlignment(TextAlignment.CENTER);
-        btnStart.setOnAction(new StartEvent(lblTimer));
+        startEvent = new StartEvent(lblTimer, this, minesweeper);
+        btnStart.setOnAction(startEvent);
 
         VBox.setVgrow(lblTimer, Priority.ALWAYS);
         sideBar.getChildren().addAll(
@@ -159,19 +161,18 @@ public class MinesweeperGUI extends Application  {
 
     private Button makeButton(int row, int col) {
         Button btn = new Button();
-       
         btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         btn.setMinSize(btn.getWidth(), btn.getHeight());
         btn.setPrefSize(btn.getWidth(), btn.getHeight());
         btn.setOnAction(new Controller(row, col, minesweeper, this));
         btn.getStylesheets().add("View/Assets/CSS/cell_button.css");
-
+        btn.setDisable(true);
         minesweeper.register(new MinesweeperObserver() {
             @Override
             public void cellClicked(Cell cell) {
-                Color color = null;
                 lblStatus.setText(minesweeper.getGameState().toString());
                 lblMoves.setText("Moves: " + minesweeper.getMoveCount());
+                Color color = null;
                 if (minesweeper.getGameState() == GameState.NOT_STARTED) {
                     color = Color.ORANGE;
                     btn.getStylesheets().clear();
@@ -180,12 +181,15 @@ public class MinesweeperGUI extends Application  {
                     if (btn.getGraphic() != null) {
                         btn.getGraphic().setVisible(false);
                     }
-                    btn.setDisable(false);
                     timeline.pause();
-
+                    startEvent.reset();
+                    btn.setDisable(true);
                 }
+            
                 else if (minesweeper.getGameState() == GameState.IN_PROGRESS) {
                     color = Color.YELLOW;
+                    btn.setDisable(false);
+                    
                 }
                 else if (minesweeper.getGameState() == GameState.WON) {
                     color = Color.GREEN;
@@ -194,7 +198,9 @@ public class MinesweeperGUI extends Application  {
                     color = Color.RED;
                 }
                 lblStatus.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
-                
+                if (cell == null) {
+                    return;
+                }
                 if (row == cell.getRow() && col == cell.getCol() && minesweeper.getGameState() != GameState.NOT_STARTED) {
                     updateButton(btn);
                     if (mediaPlayer != null) {
@@ -288,7 +294,12 @@ public class MinesweeperGUI extends Application  {
         timeline.playFromStart();
     }
 
-    
+    public void enableAllButtons() {
+        // for (Node node: grid.getChildren()) {
+        //     Button btn = (Button)node;
+        //     btn.setDisable(false);
+        // }        
+    }
             
 
     

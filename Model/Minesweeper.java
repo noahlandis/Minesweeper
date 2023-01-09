@@ -198,6 +198,7 @@ public class Minesweeper  {
 
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
+        notifyObservers(null);
     }
 
     /**
