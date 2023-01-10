@@ -55,9 +55,9 @@ import javafx.stage.Stage;
 // import javafx.event.EventHandler;
 
 public class MinesweeperGUI extends Application  {
-    private final static int ROWS = 10;
-    private final static int COLS = 10;
-    private final static int MINE_COUNT = 10;
+    private final static int ROWS = 4;
+    private final static int COLS = 4;
+    private final static int MINE_COUNT = 4;
     private Minesweeper minesweeper = new Minesweeper(ROWS, COLS, MINE_COUNT);
     private ImageView hintIcon = new ImageView(new Image("View/Assets/Images/Hint.png"));
     private final ImageView RESET_ICON = new ImageView(new Image("View/Assets/Images/Reset.png"));
@@ -81,6 +81,8 @@ public class MinesweeperGUI extends Application  {
     private Stage stage;
     BorderPane root;
     private StartEvent startEvent;
+    private Button btnHint;
+    
     /**
      * GUI setup
      */
@@ -108,9 +110,9 @@ public class MinesweeperGUI extends Application  {
         VBox sideBar = new VBox();
         Label lblMines = makeLabel("Mines: " + MINE_COUNT);
         lblMoves = makeLabel("Moves: " + minesweeper.getMoveCount());
-        Button btnHint = makeSideBarButton(hintIcon);
+        btnHint = makeSideBarButton(hintIcon);
         btnHint.setOnAction(new Hint(minesweeper, this));
-
+        btnHint.setDisable(true);
         btnReset = makeSideBarButton(RESET_ICON);
         btnReset.setOnAction(new Reset(minesweeper, this));
         btnStart = makeSideBarButton(START_ICON);
@@ -183,12 +185,16 @@ public class MinesweeperGUI extends Application  {
                     }
                     timeline.pause();
                     startEvent.reset();
-                    btn.setDisable(true);
+                    
+                    btnStart.setDisable(false);
+
                 }
             
                 else if (minesweeper.getGameState() == GameState.IN_PROGRESS) {
                     color = Color.YELLOW;
                     btn.setDisable(false);
+                    btnStart.setDisable(true);
+                    btnHint.setDisable(false);
                     
                 }
                 else if (minesweeper.getGameState() == GameState.WON) {
@@ -294,12 +300,6 @@ public class MinesweeperGUI extends Application  {
         timeline.playFromStart();
     }
 
-    public void enableAllButtons() {
-        // for (Node node: grid.getChildren()) {
-        //     Button btn = (Button)node;
-        //     btn.setDisable(false);
-        // }        
-    }
             
 
     
