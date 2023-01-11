@@ -22,7 +22,6 @@ public class MinesweeperCLI {
             "\n  help - displays this message" +
             "\n  pick <row> <col> - uncovers cell at <row> <col>" +
             "\n  hint - displays a safe selection" +
-            "\n  solve - executes all moves to solve the game" +
             "\n  reset - resets to a new game" +
             "\n  quit - quits the game"
         );
